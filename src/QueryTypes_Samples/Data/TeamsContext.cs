@@ -18,28 +18,42 @@ namespace QueryTypes_Samples.Data
         // public DbQuery<Publisher> Publishers{get;set;}
         // public DbQuery<MagazineStatsView> MagazineStats{get;set;}
 
-        public static readonly LoggerFactory MyConsoleLoggerFactory
-        = new LoggerFactory(new[] 
-       {
-              new ConsoleLoggerProvider((category, level)
-                => category == DbLoggerCategory.Database.Command.Name
-               && level == LogLevel.Information, true) });
+       // public static readonly LoggerFactory MyConsoleLoggerFactory
+       // = new LoggerFactory(new[] 
+       //{
+       //       new ConsoleLoggerProvider((category, level)
+       //         => category == DbLoggerCategory.Database.Command.Name
+       //        && level == LogLevel.Information, true) });
+
+        private ILoggerFactory CreateLoggerFactory()
+        {
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddFilter("Microsoft", LogLevel.Warning)
+                       .AddFilter("System", LogLevel.Warning)
+                       .AddFilter("QueryTypes_Samples.Data.Program", LogLevel.Debug)
+                       .AddConsole();
+            });
+
+            return loggerFactory;
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLoggerFactory(MyConsoleLoggerFactory)
+            var loggerFactory = CreateLoggerFactory();
+            optionsBuilder.UseLoggerFactory(loggerFactory)
            .UseSqlite(@"Filename=Data/PubsTracker.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Query<Publisher>();
-            modelBuilder.Query<ArticleView>().HasOne(a => a.Magazine).WithMany();
-            modelBuilder.Query<IssueView>().HasOne(i => i.Magazine).WithMany();
+            modelBuilder.Entity<Publisher>();
+            modelBuilder.Entity<ArticleView>().HasOne(a => a.Magazine).WithMany();
+            modelBuilder.Entity<IssueView>().HasOne(i => i.Magazine).WithMany();
             modelBuilder.Entity<Author>().Property(p => p.Name).HasColumnName("AuthorName");
-            modelBuilder.Query<AuthorArticleCount>().ToView("View_AuthorArticleCounts");
-            modelBuilder.Query<AuthorArticleCount>().HasOne(a => a.Author).WithOne(); //.HasForeignKey<AuthorArticleCount>(a => a.AuthorId);
-            modelBuilder.Query<MagazineStatsView>().ToQuery(
+            modelBuilder.Entity<AuthorArticleCount>().ToView("View_AuthorArticleCounts");
+            modelBuilder.Entity<AuthorArticleCount>().HasOne(a => a.Author).WithOne(); //.HasForeignKey<AuthorArticleCount>(a => a.AuthorId);
+            modelBuilder.Entity<MagazineStatsView>().ToQuery(
                 () => Magazines.Select(m => new MagazineStatsView(
                              m.Name,
                              m.Articles.Count,

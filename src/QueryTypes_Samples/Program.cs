@@ -28,7 +28,7 @@ namespace QueryTypes_Samples
 
         private static void QueryOneToManyView()
         {
-            var articles = _context.Query<ArticleView>().Include(m => m.Magazine).ToList();
+            var articles = _context.Set<ArticleView>().Include(m => m.Magazine).ToList();
 
             foreach(var article in articles)
             {
@@ -48,7 +48,7 @@ namespace QueryTypes_Samples
 
         private static void QueryArticleCountViewWithArticle()
         {
-            var results = _context.Query<AuthorArticleCount>().Include(a => a.Author).ToList();
+            var results = _context.Set<AuthorArticleCount>().Include(a => a.Author).ToList();
 
             foreach (var result in results)
             {
@@ -58,7 +58,7 @@ namespace QueryTypes_Samples
 
         private static void PublisherQuery()
         {
-            var results = _context.Query<Publisher>().FromSql("select name, yearfounded from publishers").ToList();
+            var results = _context.Set<Publisher>().FromSqlRaw("select name, yearfounded from publishers").ToList();
 
             foreach (var result in results)
             {
@@ -68,7 +68,7 @@ namespace QueryTypes_Samples
 
         private static void QueryTypeFromSql()
         {
-            var results = _context.Authors.FromSql("select authorid,authorname from authors").ToList();
+            var results = _context.Authors.FromSqlRaw("select authorid,authorname from authors").ToList();
 
             foreach (var result in results)
             {
@@ -85,7 +85,7 @@ namespace QueryTypes_Samples
             //                }
             // ).ToList();
 
-            var results = _context.Query<MagazineStatsView>().ToList();
+            var results = _context.Set<MagazineStatsView>().ToList();
 
             foreach (var result in results)
             {
@@ -96,7 +96,7 @@ namespace QueryTypes_Samples
         private static void QueryAuthorArticleCountView()
         {
             //var results = _context.AuthorArticleCounts.ToList();
-            var results = _context.Query<AuthorArticleCount>().ToList();
+            var results = _context.Set<AuthorArticleCount>().ToList();
 
             foreach(var result in results)
             {
